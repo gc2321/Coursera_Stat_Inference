@@ -1,0 +1,104 @@
+---
+title: "The Effect of Vitamin C on Tooth Growth in Guinea Pigs"
+output: html_document
+---
+### Background:
+In this report, I analyze the ToothGrowth data package. This study assesses the effect of Vitamin C on tooth growth of Guinea pigs.
+It contains measurement of the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+
+A data frame with 60 observations on 3 variables.
+
+[,1]	 len	 numeric	 Tooth length
+
+[,2]	 supp	 factor	 Supplement type (VC or OJ).
+
+[,3]	 dose	 numeric	 Dose in milligrams.
+
+Source
+
+C. I. Bliss (1952) The Statistics of Bioassay. Academic Press.
+
+References
+
+McNeil, D. R. (1977) Interactive Data Analysis. New York: Wiley.
+
+### Analysis
+
+Loading the data:
+```{r}
+data("ToothGrowth")				
+d<-as.data.frame(ToothGrowth)
+```
+
+Summary of the dataframe:
+```{r}
+str(ToothGrowth)
+```
+
+Obtaining the mean of tooth length in the six groups:
+```{r}
+xtabs(len~supp+dose, aggregate(len~supp+dose, d, mean))
+```
+
+Plotting tooth length of the six groups:
+```{r}
+boxplot(len~supp+dose, data=d, xlab="Delivery method and dose of Vitamin C", ylab="Tooth Length", main="Effect of Vitamin C on Tooth Growth in Guinea Pigs")
+```
+
+Table of summary of each group:
+
+```{r, warning=FALSE, message=FALSE}
+library(plyr)
+ddply(d, c("supp", "dose"), summarise, 
+		N = length(len),
+		min = min(len), 		
+		median = median(len),		
+        mean = mean(len),	       	
+		max = max(len),
+        se   = sd(len) / sqrt(N))
+
+```
+
+where N is sample size, min is minimum value, max is maximum value, se is standard error.
+
+Each dose group is subsetted into a different data frame for further analysis:
+
+```{r}
+d05<-d[d$dose==0.5,]
+d1<-d[d$dose==1.0,]
+d2<-d[d$dose==2.0,]
+```
+
+Using t-test, I compare the effect of different delivery method on tooth length:
+
+Dose = 0.5 mg, comparing OJ versus VC:
+
+```{r}
+lapply(d05[1], function(x) t.test(x ~ d05$supp, var.equal = FALSE))
+```
+
+Dose = 1 mg, comparing OJ versus VC:
+
+```{r}
+lapply(d1[1], function(x) t.test(x ~ d1$supp, var.equal = FALSE))
+```
+
+Dose = 2 mg, comparing OJ versus VC:
+
+```{r}
+lapply(d2[1], function(x) t.test(x ~ d2$supp, var.equal = FALSE))
+
+```
+
+### Conclusion:
+At doses of 0.5 or 1 mg of Vitamin C, delivery by Orange Juice produced longer teeth. However, at 2 mg of Vitamin C, delivery by either method produce similar tooth length in Guinea pigs.
+
+Assumptions:
+
+1. All other factors besides delivery method and doses are controlled.
+2. Guinea pigs were randomly assigned to each group and are representative of the general population.
+3. Data are collected by "blind" personel(s) in this experiment.
+
+
+
+
